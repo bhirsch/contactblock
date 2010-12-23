@@ -1,0 +1,51 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function contactblock_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'contact_mail_page' && arg(0) != 'contact') {
+    // Display a plain contact form. No contact-info on top.
+    unset($form['contact_information']); // TODO make this setting configurable from admin/build/block
+    $form_items = $form;
+    foreach ($form_items as $form_item => $values) {
+      if ($values['#type'] == 'textfield') {
+        $form[$form_item]['#size'] = 40; // TODO make this setting configurable from admin/build/block
+      } 
+    }
+  }
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function contactblock_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks = array();
+      if (module_exists('contact')) {
+        $blocks['contact_form'] = array(
+          'info' => t('Site-wide contact form'));
+      }
+      return $blocks;
+
+    case 'view':
+      if ($delta == 'contact_form' && arg(0) != 'contact') {
+        if (user_access('access site-wide contact form') && module_exists('contact')) {
+          if (!flood_is_allowed('contact', variable_get('contact_hourly_threshold', 3))) {
+            $content = t("You cannot send more than %number messages per hour. Please try again later.", array('%number' => variable_get('contact_hourly_threshold', 3)));
+          }
+          else {
+            module_load_include('inc', 'contact', 'contact.pages');
+            $content = drupal_get_form('contact_mail_page');
+          }
+          // drupal_add_css(drupal_get_path('module', 'contactblock'). '/contact.css', 'module', 'all');
+          return array(
+            'subject' => t('Contact'),
+            'content' => $content,
+          );
+        }
+      }
+  }
+}

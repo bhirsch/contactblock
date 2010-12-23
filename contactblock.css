@@ -1,0 +1,6 @@
+/* $Id */
+
+div#block-formblock-contact_form .form-text,
+  display: block;
+  width: 95%;
+}
