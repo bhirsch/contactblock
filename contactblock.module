@@ -11,7 +11,7 @@ function contactblock_form_alter(&$form, $form_state, $form_id) {
     $form_items = $form;
     foreach ($form_items as $form_item => $values) {
       if ($values['#type'] == 'textfield') {
-        $form[$form_item]['#size'] = 40; // TODO make this setting configurable from admin/build/block
+        $form[$form_item]['#size'] = 30; // TODO make this setting configurable from admin/build/block
       } 
     }
   }
